@@ -18,6 +18,7 @@ class DataCollectionViewController04b: UIViewController, UIWebViewDelegate, UISc
     private var lastScaleValue: CGFloat = 1.0 // pomocná proměnná která udržuje hodnotu přiblížení mezi gesty
     public var mapURL:URL?
     public var mapID: String?
+    public var currentCoords: CGPoint? // aktuální souřadnice
     
     
     
@@ -49,20 +50,21 @@ class DataCollectionViewController04b: UIViewController, UIWebViewDelegate, UISc
     /// Dokončení scrollování - skončení animace (získání a vypsání souřadnic)
     func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
 
-        let currentCoords = getCoordinates()
-        labelCoord.text = "X:\(Int(currentCoords.x)) Y:\(Int(currentCoords.y))"
+        //let currentCoords = getCoordinates()
+        currentCoords = getCoordinates()
+        labelCoord.text = "X:\(Int(currentCoords!.x)) Y:\(Int(currentCoords!.y))"
     }
     
     /// Dokončení scrollování - odstranění prstu z obrazovky (získání a vypsání souřadnic)
     func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
-        
-        let currentCoords = getCoordinates()
-        labelCoord.text = "X:\(Int(currentCoords.x)) Y:\(Int(currentCoords.y))"
+
+        currentCoords = getCoordinates()
+        labelCoord.text = "X:\(Int(currentCoords!.x)) Y:\(Int(currentCoords!.y))"
     }
     
     /// Příprava view s mapou předtím, než je samotný view zobrazen
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        
+
         if segue.identifier == "segueCollectDataProgress" {
             
             let destinationView = segue.destination as? DataCollectionViewController05b
@@ -72,7 +74,6 @@ class DataCollectionViewController04b: UIViewController, UIWebViewDelegate, UISc
                 destinationView?.mapID = mapID!
                 destinationView?.mapCoord = getCoordinates()
             }
-            
         }
     }
     
@@ -91,6 +92,15 @@ class DataCollectionViewController04b: UIViewController, UIWebViewDelegate, UISc
         return currentPoint
     }
 
+    /// Nastavení mapy na požadované souřadnice
+    private func setCoordinates() {
+        
+        if currentCoords != nil {
+            let x: Int = Int(currentCoords?.x ?? 0)
+            let y: Int = Int(currentCoords?.y ?? 0)
+            mapWebView.stringByEvaluatingJavaScript(from: "scrollToLogicXY(\(x), \(y))") // nastavení pozice mapy
+        }
+    }
 
     
     // MARK: - DELEGÁTI WEB VIEW
@@ -107,11 +117,14 @@ class DataCollectionViewController04b: UIViewController, UIWebViewDelegate, UISc
     /// po načtení stránky zjistit aktuální souřadnice
     func webViewDidFinishLoad(_ webView: UIWebView) {
         
-        let currentCoords = getCoordinates()
-        
         mapWebView.stringByEvaluatingJavaScript(from: "document.getElementById('zoom-in').hidden='hidden';") // skrytí tlačítka zoom-in
         mapWebView.stringByEvaluatingJavaScript(from: "document.getElementById('zoom-out').hidden='hidden';")// skrytí tlačítka zoom-out
-        labelCoord.text = "X:\(Int(currentCoords.x)) Y:\(Int(currentCoords.y))" // vypsání aktuálních souřadnic
+        
+
+        setCoordinates()
+
+        currentCoords = getCoordinates()
+        labelCoord.text = "X:\(Int(currentCoords!.x)) Y:\(Int(currentCoords!.y))" // vypsání aktuálních souřadnic
 
         labelCoord.isHidden = false
         buttonStart.isEnabled = true

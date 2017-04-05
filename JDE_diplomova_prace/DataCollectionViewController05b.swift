@@ -13,7 +13,7 @@ class DataCollectionViewController05b: UITableViewController, WirelessManagerDel
     // MARK: - PROMĚNNÉ
     
     public var mapID: String = "" // identifikátor mapy předaná z mapView
-    public var mapCoord: CGPoint?// = CGPoint() // souřadnice vyberané na mapě předané z mapView
+    public var mapCoord: CGPoint? // souřadnice vybrané na mapě předané z mapView
     private let bleManager = ManagerBLE() // vytvoření nové instance bluetooth managera
     private let gpsManager = ManagerGPS() // vytvoření nové instance GPS managera
     private let btsManager = ManagerBTS() // vytvoření nové instance BTS managera
@@ -46,7 +46,7 @@ class DataCollectionViewController05b: UITableViewController, WirelessManagerDel
     }
     
     override func viewDidAppear(_ animated: Bool) {
-        
+       
         startTime = Date()
         dataHolder.level = mapID
         dataHolder.mapX = Int(mapCoord?.x ?? 0)
@@ -78,9 +78,9 @@ class DataCollectionViewController05b: UITableViewController, WirelessManagerDel
             gatheringFinished()
         }
     }
+
     
-    
-    
+        
     // MARK: - DELEGÁTI WIRELESS MANAGERŮ
     
     /// Připojení k BLE zařízení navázáno
@@ -153,7 +153,18 @@ class DataCollectionViewController05b: UITableViewController, WirelessManagerDel
         motionManager.stopMagnetometerUpdates()
         
         saveDataToDatabase() // uložení naměřených dat do lokální databáze
-        self.performSegue(withIdentifier: "segueCollectingBackToRootNavigationController", sender: self)
+        //self.performSegue(withIdentifier: "segueCollectingBackToRootNavigationController", sender: self)
+
+        
+        if let viewIndex = navigationController?.viewControllers.index(of: self) {
+            if viewIndex > 0 {
+                if let previousView = navigationController?.viewControllers[viewIndex - 1] as? DataCollectionViewController04b {
+                    previousView.currentCoords = mapCoord
+                }
+            }
+        }
+
+        navigationController?.popViewController(animated: true)
     }
     
     /// Uložení dat do databáze
