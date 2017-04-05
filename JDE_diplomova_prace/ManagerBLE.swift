@@ -42,7 +42,7 @@ class ManagerBLE: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
     }
     
     /// Zkusí získat MAC adres BLE zařízení. Pokud jí není možné získat, vrátí nil
-    private func getMacAddress(advertisementData: [String : Any]) -> String? {
+    private func getMacAddress(advertisementData: [String : Any]) -> (mac: String, major: Int, minor: Int)? {
         
         if let data = advertisementData["kCBAdvDataServiceData"] as? NSDictionary {
             
@@ -50,12 +50,18 @@ class ManagerBLE: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
                 
                 let strKey: String? = String(describing: dataItem.key)
                 let strValue: String? = String(describing: dataItem.value)
-                
-                if strKey != nil && strValue != nil && strKey!.compare("Device Information") == ComparisonResult.orderedSame && strValue!.characters.count > 15 {
-                    
+               
+                if strKey != nil && strValue != nil && strKey!.compare("Device Information") == ComparisonResult.orderedSame && strValue!.characters.count > 25 {
+               
                     var macAddress = ""
+                    var minor = ""
+                    var major = ""
+                    
+                   
+                    
                     var strArray = Array(strValue!.characters)
 
+                    // získání MAC adresy
                     macAddress.append(strArray[12])
                     macAddress.append(strArray[13])
                     macAddress.append(":")
@@ -74,7 +80,25 @@ class ManagerBLE: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
                     macAddress.append(strArray[1])
                     macAddress.append(strArray[2])
                     
-                    return macAddress
+                    
+                    // získání hodnoty MAJOR
+                    major.append(strArray[19])
+                    major.append(strArray[20])
+                    major.append(strArray[16])
+                    major.append(strArray[17])
+                    
+                    // získání hodnoty MINOR
+                    minor.append(strArray[23])
+                    minor.append(strArray[24])
+                    minor.append(strArray[21])
+                    minor.append(strArray[22])
+
+                    // převedení z HEX na DEC
+                    let intMinor = Int(minor, radix: 16) ?? 0
+                    let intMajor = Int(major, radix: 16) ?? 0
+                    
+           
+                    return (mac: macAddress, major: intMajor, minor: intMinor)
                 }
             }
         }
@@ -98,12 +122,13 @@ class ManagerBLE: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
     func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String : Any], rssi RSSI: NSNumber) {
         
         
-        if let macAddress = getMacAddress(advertisementData: advertisementData) {
+        if let advertParsedData = getMacAddress(advertisementData: advertisementData) {
            
             if (!peripheralsList.contains(peripheral)) { peripheralsList.append(peripheral) } // uložení strong reference do pole, aby nedošlo k odpojení z důvodu odstranění GC
             
             let deviceName: String = peripheral.name ?? "Neznámé zařízení"
-            let newDevice = DataItemBLE(uuid: peripheral.identifier, address: macAddress, deviceName: deviceName)
+            //let newDevice = DataItemBLE(uuid: peripheral.identifier, address: advertParsedData.mac, deviceName: deviceName)
+            let newDevice = DataItemBLE(uuid: peripheral.identifier, address: advertParsedData.mac, deviceName: deviceName, major: advertParsedData.major, minor: advertParsedData.minor)
             delegate?.deviceDidConnect(newDevice: newDevice)
 
             peripheral.delegate = self

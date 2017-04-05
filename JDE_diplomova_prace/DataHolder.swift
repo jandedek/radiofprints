@@ -211,21 +211,25 @@ class DataHolder: NSObject, Comparable {
         // *** přidání naměřených dat BLE ***
         if self.collectBluetoothData! {
             var bleData = [Any]()
-            
+           
             // procházení zařízení
             for case let device as DataItemBLE in self.collectedData {
                 // procházení naměřených hodnot pro každé zařízení
                 for collectedValues in device.listOfValues {
+                
                     let deviceData =
                     [
                         "uuid": device.uuid.uuidString,
                         "address": device.address,
-                        "rssi": collectedValues.rssi.description,
-                        "time": collectedValues.elapsedTime.description,
+                        "major": device.major,
+                        "minor": device.minor,
+                        "rssi": collectedValues.rssi,
+                        "time": collectedValues.elapsedTime,
                         "deviceName": device.stringDeviceName()
                     ] as [String : Any]
                     
                     bleData.append(deviceData)
+                    
                 }
             }
             jsonData.updateValue(bleData, forKey: "bleScans")
@@ -406,13 +410,18 @@ class DataHolder: NSObject, Comparable {
                 if let device = item as? NSDictionary {
                     let deviceName: String = (device.value(forKey: "deviceName") as? String) ?? ""
                     let macAddress: String = (device.value(forKey: "address") as? String) ?? ""
-                    let rssi: Int? = ((device.value(forKey: "rssi") as? NSString)?.integerValue)
-                    let time: Int? = ((device.value(forKey: "time") as? NSString)?.integerValue)
-                    if (rssi != nil && time != nil), let uuid = UUID(uuidString:(device.value(forKey: "uuid") as? String) ?? "") {
-                        let dataItemBLE = DataItemBLE(uuid: uuid, address: macAddress, deviceName: deviceName )
+
+                    let major: Int = device["major"] as? Int ?? 0
+                    let minor: Int = device["minor"] as? Int ?? 0
+                    let rssi: Int = device["rssi"] as? Int ?? 0
+                    let time: Int = device["time"] as? Int ?? 0
+
+                    if let uuid = UUID(uuidString:(device.value(forKey: "uuid") as? String) ?? "") {
+
+                        let dataItemBLE = DataItemBLE(uuid: uuid, address: macAddress, deviceName: deviceName, major: major, minor: minor)
                         dataItemBLE.deviceName = deviceName
                         _ = data.addDevice(newDevice: dataItemBLE)
-                        data.addValueBle(uuid: uuid, rssi: rssi!, elapsedTime: time!)
+                        data.addValueBle(uuid: uuid, rssi: rssi, elapsedTime: time)
                     }
                 }
             }

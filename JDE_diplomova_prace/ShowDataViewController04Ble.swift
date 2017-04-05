@@ -45,9 +45,8 @@ class ShowDataViewController04Ble: UITableViewController {
         
         let cell = tableView.dequeueReusableCell(withIdentifier: "PrototypeCellShowDataBluetooth", for: indexPath) as! PrototypeCellShowDataBluetooth //použití připraveného prototypu buňky
         let dataRow = collectedData[indexPath.row] // data pro aktuální řádek
-        
+    
         cell.lblName.text = dataRow.name
-        //cell.lblUuid.text = dataRow.uuid.uuidString
         cell.lblUuid.text = dataRow.address
         cell.lblRssi.text = ("\(dataRow.rssi) dB")
         cell.lblElapsedTime.text = ("\(dataRow.elapsedTime) ms")

@@ -17,6 +17,12 @@ class DataItemBLE: NSObject, ProtocolWirelessManager {
     /// MAC adresa zařízení
     public var address: String = ""
     
+    /// Hodnota major
+    public var major: Int = 0
+    
+    /// Hodnota minor
+    public var minor: Int = 0
+    
     /// Indikuje zda je UUID skryté v přehledu při měření
     public let uuidIsHidden: Bool = false
     
@@ -31,11 +37,13 @@ class DataItemBLE: NSObject, ProtocolWirelessManager {
     
     
     /// Konstruktor třídy
-    init(uuid: UUID, address: String, deviceName: String) {
+    init(uuid: UUID, address: String, deviceName: String, major: Int, minor: Int) {
         
         self.uuid = uuid
         self.address = address
         self.deviceName = deviceName
+        self.major = major
+        self.minor = minor
         super.init()
     }
     
