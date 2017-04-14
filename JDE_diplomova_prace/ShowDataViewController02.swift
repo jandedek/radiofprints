@@ -67,7 +67,7 @@ class ShowDataViewController02: UITableViewController
         //použití připraveného prototypu buňky a naplnění třídy daty
         let cell = tableView.dequeueReusableCell(withIdentifier: "PrototypeCellShowData", for: indexPath) as! PrototypeCellShowData
         cell.rowData = collectedData[indexPath.row]
-        
+       
         // informace o mapě
         if let map = SettingsManager.sharedInstance.listOfMaps[cell.rowData?.level ?? ""] {
             cell.mapID = map.mapID
@@ -87,5 +87,50 @@ class ShowDataViewController02: UITableViewController
     
         return cell
     }
+    
+    override func tableView(_ tableView: UITableView, editingStyleForRowAt indexPath: IndexPath) -> UITableViewCellEditingStyle {
+        
+        return UITableViewCellEditingStyle.delete // akce pro všechny řádky při swipe vlevo
+    }
+    
+     override func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
+    
+        // podmínka k určení které řádky je možné updatovat (vymazat) a které nikoli
+        
+        if let cell = tableView.cellForRow(at: indexPath) as? PrototypeCellShowData {
+            // FIXME: otestovat na simulátoru, nemělo by jít smazat!
+            // porovnání zda měření proběhlo na zařízení kde je zorbazováno
+            if cell.rowData?.deviceID != nil && UIDevice.current.identifierForVendor != nil {
+                if cell.rowData!.deviceID!.caseInsensitiveCompare(UIDevice.current.identifierForVendor!.uuidString) == ComparisonResult.orderedSame {
+                    return true
+                }
+            }
+
+        }
+
+        return false
+        
+    }
+    
+    
+
+
+    
+    
+     // Override to support editing the table view.
+     override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
+        /*
+        if editingStyle == .delete {
+            // Delete the row from the data source
+            tableView.deleteRows(at: [indexPath], with: .fade)
+        }
+        else if editingStyle == .insert {
+            // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view
+        }
+ */
+     }
+    
+
+
     
 }

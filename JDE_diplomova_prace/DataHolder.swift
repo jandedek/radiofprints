@@ -477,7 +477,7 @@ class DataHolder: NSObject, Comparable {
             }
         }
 
-        return collectedData.sorted(by: { $0 < $1 })
+        return collectedData.sorted(by: { $0 > $1 })
     }
     
     /// Statická funkce podepíše předaným couchID všechny záznamy, které se nacházejí v lokální databázi, nemají vyplněné ID uživatele a byly pořízeny na tomto zařízení
