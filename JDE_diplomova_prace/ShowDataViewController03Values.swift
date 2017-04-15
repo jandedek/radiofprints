@@ -39,7 +39,6 @@ class ShowDataViewController03Values: UITableViewController {
                 for device in (collectedData?.getBleData())! {
                     for value in device.listOfValues  {
                         destinationView.collectedData.append((address: device.address, name: device.deviceName, rssi: value.rssi, elapsedTime: value.elapsedTime))
-                        print("minor: \(device.minor) major: \(device.major)")
                     }
                 }
                 destinationView.collectedData = destinationView.collectedData.sorted(by: {$0.0.elapsedTime < $0.1.elapsedTime}) // seřazení pole vzestupně podle času měření
