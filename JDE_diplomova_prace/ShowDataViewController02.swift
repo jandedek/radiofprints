@@ -93,44 +93,40 @@ class ShowDataViewController02: UITableViewController
         return UITableViewCellEditingStyle.delete // akce pro všechny řádky při swipe vlevo
     }
     
-     override func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
+    override func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
     
         // podmínka k určení které řádky je možné updatovat (vymazat) a které nikoli
         
         if let cell = tableView.cellForRow(at: indexPath) as? PrototypeCellShowData {
-            // FIXME: otestovat na simulátoru, nemělo by jít smazat!
-            // porovnání zda měření proběhlo na zařízení kde je zorbazováno
             if cell.rowData?.deviceID != nil && UIDevice.current.identifierForVendor != nil {
-                if cell.rowData!.deviceID!.caseInsensitiveCompare(UIDevice.current.identifierForVendor!.uuidString) == ComparisonResult.orderedSame {
+                
+                // hledání záznamu který byl pořízen na tomto zařízení a nebyl synchronizován (podepsán)
+                if cell.rowData!.deviceID!.caseInsensitiveCompare((UIDevice.current.identifierForVendor?.uuidString)!) == ComparisonResult.orderedSame && cell.rowData!.userID?.caseInsensitiveCompare("-") == ComparisonResult.orderedSame
+                {
                     return true
                 }
             }
-
         }
 
         return false
-        
     }
     
-    
-
-
-    
-    
-     // Override to support editing the table view.
-     override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
-        /*
+    override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
+        
         if editingStyle == .delete {
-            // Delete the row from the data source
-            tableView.deleteRows(at: [indexPath], with: .fade)
+    
+            
+            if let cell = tableView.cellForRow(at: indexPath) as? PrototypeCellShowData {
+                if let document = cell.rowData?.databaseDocument {
+                    
+                    try? document.delete()
+                    collectedData.remove(at: indexPath.row)
+                    tableView.deleteRows(at: [indexPath], with: UITableViewRowAnimation.fade)
+                }
+            }
         }
-        else if editingStyle == .insert {
-            // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view
-        }
- */
+
      }
     
-
-
     
 }
